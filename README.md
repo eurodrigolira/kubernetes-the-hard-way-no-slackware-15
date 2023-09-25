@@ -6,11 +6,10 @@ Neste repositório você encontrara os arquivos referente a minha serie de posts
 
 Abaixo o link para cada post.
 
-[Kubernetes The Hard Way no Slackware 15 – Parte 01](https://rodrigolira.eti.br/kubernetes-the-hard-way-no-slackware-15-parte-01/)
- 
-[Kubernetes The Hard Way no Slackware 15 – Parte 02](https://rodrigolira.eti.br/kubernetes-the-hard-way-no-slackware-15-parte-02/)
+[Kubernetes The Hard Way no Slackware 15 – Parte 01](https://rodrigolira.eti.br/kubernetes-the-hard-way-no-slackware-15-parte-01/)  
+[Kubernetes The Hard Way no Slackware 15 – Parte 02](https://rodrigolira.eti.br/kubernetes-the-hard-way-no-slackware-15-parte-02/)  
 
 Versões dos utilitários:
 
-**cfssl/cfssljson** - [https://github.com/cloudflare/cfssl/releases/tag/v1.6.4](https://github.com/cloudflare/cfssl/releases/tag/v1.6.4)
-**kubectl** - [https://dl.k8s.io/v1.28.1/bin/linux/amd64/kubectl](https://dl.k8s.io/v1.28.1/bin/linux/amd64/kubectl)
+**cfssl/cfssljson** - [https://github.com/cloudflare/cfssl/releases/tag/v1.6.4](https://github.com/cloudflare/cfssl/releases/tag/v1.6.4)  
+**kubectl** - [https://dl.k8s.io/v1.28.1/bin/linux/amd64/kubectl](https://dl.k8s.io/v1.28.1/bin/linux/amd64/kubectl)  
