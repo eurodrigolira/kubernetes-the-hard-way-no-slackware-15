@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Start containerd:
+if [ -x /etc/rc.d/rc.containerd ]; then
+  /etc/rc.d/rc.containerd start
+fi
+# Start kubelet:
+if [ -x /etc/rc.d/rc.kubelet ]; then
+  /etc/rc.d/rc.kubelet start
+fi
+# Start kube-proxy:
+if [ -x /etc/rc.d/rc.kube-proxy ]; then
+  /etc/rc.d/rc.kube-proxy start
+fi

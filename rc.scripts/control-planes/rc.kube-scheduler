@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# kube-scheduler startup script for Slackware Linux
+#
+NAME=kube-scheduler
+CMD=/usr/local/bin/${NAME}
+LOG=/var/log/kube-scheduler.log
+PID=$(pgrep --exact kube-scheduler)
+STATUS=/proc/${PID}/status
+
+# Check if kube-scheduler is present.
+if [ ! -x ${CMD} ]; then
+  echo "${NAME} not present or not executable."
+  exit 1
+fi
+
+kubescheduler_start() {
+  if [ -e ${STATUS} ]; then
+    echo "${NAME} already running."
+  else
+    echo "Starting ${NAME}..."
+    nohup ${CMD} \
+	    --config=/etc/kubernetes/config/kube-scheduler.yaml \
+	    --v=2 \
+	    >> ${LOG} 2>&1 &
+  fi
+
+}
+
+kubescheduler_stop() {
+  if [ -e ${STATUS} ]; then
+    echo "Stopping ${NAME}..."
+    kill ${PID}
+    while [ -e ${STATUS} ]; do
+      sleep 1
+      echo -n "."
+    done
+  fi 
+}
+
+kubescheduler_restart() {
+  kubeapiserver_stop
+  sleep 1
+  kubeapiserver_start
+}	
+
+kubescheduler_status() {
+  if [ -e ${STATUS} ]; then
+    echo "Status of ${NAME}: running"
+  else
+    echo "Status of ${NAME}: stopped"
+  fi
+}
+
+case "$1" in
+  'start')
+    kubescheduler_start
+    ;;
+  'stop')
+    kubescheduler_stop
+    ;;
+  'restart')
+    kubescheduler_restart
+    ;;
+  'status')
+    kubescheduler_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

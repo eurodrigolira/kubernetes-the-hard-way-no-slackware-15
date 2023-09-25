@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# containerd startup script for Slackware Linux
+#
+NAME=containerd
+CMD=/bin/${NAME}
+LOG=/var/log/containerd.log
+PID=$(pgrep --exact containerd)
+STATUS=/proc/${PID}/status
+
+# Check if containerd is present.
+if [ ! -x ${CMD} ]; then
+  echo "${NAME} not present or not executable."
+  exit 1
+fi
+
+containerd_start() {
+  if [ -e ${STATUS} ]; then
+    echo "${NAME} already running."
+  else
+    echo "Starting ${NAME}..."
+    /sbin/modprobe overlay
+    nohup ${CMD} >> ${LOG} 2>&1 &
+  fi
+
+}
+
+containerd_stop() {
+  if [ -e ${STATUS} ]; then
+    echo "Stopping ${NAME}..."
+    kill ${PID}
+    while [ -e ${STATUS} ]; do
+      sleep 1
+      echo -n "."
+    done
+  fi 
+}
+
+containerd_restart() {
+  containerd_stop
+  sleep 1
+  containerd_start
+}	
+
+containerd_status() {
+  if [ -e ${STATUS} ]; then
+    echo "Status of ${NAME}: running"
+  else
+    echo "Status of ${NAME}: stopped"
+  fi
+}
+
+case "$1" in
+  'start')
+    containerd_start
+    ;;
+  'stop')
+    containerd_stop
+    ;;
+  'restart')
+    containerd_restart
+    ;;
+  'status')
+    containerd_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# kube-proxy startup script for Slackware Linux
+#
+NAME=kube-proxy
+CMD=/usr/local/bin/${NAME}
+LOG=/var/log/kube-proxy.log
+PID=$(pgrep --exact kube-proxy)
+STATUS=/proc/${PID}/status
+
+# Check if kube-proxy is present.
+if [ ! -x ${CMD} ]; then
+  echo "${NAME} not present or not executable."
+  exit 1
+fi
+
+kubeproxy_start() {
+  if [ -e ${STATUS} ]; then
+    echo "${NAME} already running."
+  else
+    echo "Starting ${NAME}..."
+    nohup ${CMD} \
+	    --config=/var/lib/kube-proxy/kube-proxy-config.yaml \
+	    >> ${LOG} 2>&1 &
+  fi
+}
+
+kubeproxy_stop() {
+  if [ -e ${STATUS} ]; then
+    echo "Stopping ${NAME}..."
+    kill ${PID}
+    while [ -e ${STATUS} ]; do
+      sleep 1
+      echo -n "."
+    done
+  fi 
+}
+
+kubeproxy_restart() {
+  kubeproxy_stop
+  sleep 1
+  kubeproxy_start
+}	
+
+kubeproxy_status() {
+  if [ -e ${STATUS} ]; then
+    echo "Status of ${NAME}: running"
+  else
+    echo "Status of ${NAME}: stopped"
+  fi
+}
+
+case "$1" in
+  'start')
+    kubeproxy_start
+    ;;
+  'stop')
+    kubeproxy_stop
+    ;;
+  'restart')
+    kubeproxy_restart
+    ;;
+  'status')
+    kubeproxy_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

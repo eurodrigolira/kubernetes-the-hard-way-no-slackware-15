@@ -1,0 +1,76 @@
+#!/bin/sh
+#
+# kubelet startup script for Slackware Linux
+#
+NAME=kubelet
+CMD=/usr/local/bin/${NAME}
+LOG=/var/log/kubelet.log
+PID=$(pgrep --exact kubelet)
+STATUS=/proc/${PID}/status
+
+# Check if kubelet is present.
+if [ ! -x ${CMD} ]; then
+  echo "${NAME} not present or not executable."
+  exit 1
+fi
+
+kubelet_start() {
+  if [ -e ${STATUS} ]; then
+    echo "${NAME} already running."
+  else
+    echo "Starting ${NAME}..."
+    nohup ${CMD} \
+	    --config=/var/lib/kubelet/kubelet-config.yaml \
+	    --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \
+	    --pod-infra-container-image=registry.k8s.io/pause:3.8 \
+	    --kubeconfig=/var/lib/kubelet/kubeconfig \
+	    --resolv-conf=/etc/resolv.conf \
+	    --register-node=true \
+	    --v=2 \
+	    >> ${LOG} 2>&1 &
+  fi
+}
+
+kubelet_stop() {
+  if [ -e ${STATUS} ]; then
+    echo "Stopping ${NAME}..."
+    kill ${PID}
+    while [ -e ${STATUS} ]; do
+      sleep 1
+      echo -n "."
+    done
+  fi 
+}
+
+kubelet_restart() {
+  kubelet_stop
+  sleep 1
+  kubelet_start
+}	
+
+kubelet_status() {
+  if [ -e ${STATUS} ]; then
+    echo "Status of ${NAME}: running"
+  else
+    echo "Status of ${NAME}: stopped"
+  fi
+}
+
+case "$1" in
+  'start')
+    kubelet_start
+    ;;
+  'stop')
+    kubelet_stop
+    ;;
+  'restart')
+    kubelet_restart
+    ;;
+  'status')
+    kubelet_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0

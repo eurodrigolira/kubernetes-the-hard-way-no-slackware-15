@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Start etcd:
+if [ -x /etc/rc.d/rc.etcd ]; then
+  /etc/rc.d/rc.etcd start
+fi
+# Start kube-apiserver:
+if [ -x /etc/rc.d/rc.kube-apiserver ]; then
+  /etc/rc.d/rc.kube-apiserver start
+fi
+# Start kube-controller-manager:
+if [ -x /etc/rc.d/rc.kube-controller-manager ]; then
+  /etc/rc.d/rc.kube-controller-manager start
+fi
+# Start kube-scheduler:
+if [ -x /etc/rc.d/rc.kube-scheduler ]; then
+  /etc/rc.d/rc.kube-scheduler start
+fi

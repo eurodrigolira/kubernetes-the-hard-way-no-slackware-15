@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+# kube-controller-manager startup script for Slackware Linux
+#
+NAME=kube-controller-manager
+CMD=/usr/local/bin/${NAME}
+LOG=/var/log/kube-controller-manager.log
+PID=$(pgrep -x kube-controller)
+STATUS=/proc/${PID}/status
+
+# Check if kube-controller-manager is present.
+if [ ! -x ${CMD} ]; then
+  echo "${NAME} not present or not executable."
+  exit 1
+fi
+
+kubecontrollermanager_start() {
+  if [ -e ${STATUS} ]; then
+    echo "${NAME} already running."
+  else
+    echo "Starting ${NAME}..."
+    nohup ${CMD} \
+	    --bind-address=0.0.0.0 \
+	    --cluster-cidr=10.200.0.0/16 \
+	    --cluster-name=kubernetes \
+	    --cluster-signing-cert-file=/var/lib/kubernetes/ca.pem \
+	    --cluster-signing-key-file=/var/lib/kubernetes/ca-key.pem \
+	    --kubeconfig=/var/lib/kubernetes/kube-controller-manager.kubeconfig \
+	    --leader-elect=true \
+	    --root-ca-file=/var/lib/kubernetes/ca.pem \
+	    --service-account-private-key-file=/var/lib/kubernetes/service-account-key.pem \
+	    --service-cluster-ip-range=10.32.0.0/24 \
+	    --use-service-account-credentials=true \
+	    --v=2 \
+	    >> ${LOG} 2>&1 &
+  fi
+
+}
+
+kubecontrollermanager_stop() {
+  if [ -e ${STATUS} ]; then
+    echo "Stopping ${NAME}..."
+    kill ${PID}
+    while [ -e ${STATUS} ]; do
+      sleep 1
+      echo -n "."
+    done
+  fi 
+}
+
+kubecontrollermanager_restart() {
+  kubecontrollermanager_stop
+  sleep 1
+  kubecontrollermanager_start
+}	
+
+kubecontrollermanager_status() {
+  if [ -e ${STATUS} ]; then
+    echo "Status of ${NAME}: running"
+  else
+    echo "Status of ${NAME}: stopped"
+  fi
+}
+
+case "$1" in
+  'start')
+    kubecontrollermanager_start
+    ;;
+  'stop')
+    kubecontrollermanager_stop
+    ;;
+  'restart')
+    kubecontrollermanager_restart
+    ;;
+  'status')
+    kubecontrollermanager_status
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+esac
+
+exit 0
